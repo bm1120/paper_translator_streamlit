@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import tempfile
 import shutil
 import sys
+import time
 
 # 버전 정보 출력
 st.write(f"Python 버전: {sys.version}")
@@ -100,13 +101,19 @@ if uploaded_file is not None:
                         "Ollama": "ollama:gemma2"
                     }
                     
+                    # DeepL 서비스 사용 시 추가 메시지
+                    if translation_service == "DeepL":
+                        st.info("DeepL 번역은 시간이 더 소요될 수 있습니다. 잠시만 기다려주세요.")
+                    
                     # CLI 명령어 실행
                     command = [
                         "pdf2zh",
                         input_path,
                         "--service", service_config[translation_service],
                         "--lang-in", "en",
-                        "--lang-out", target_lang
+                        "--lang-out", target_lang,
+                        # DeepL 서비스 사용 시 타임아웃 설정 추가
+                        "--timeout", "300" if translation_service == "DeepL" else "60"
                     ]
                     
                     st.write(f"실행 명령어: {' '.join(command)}")
@@ -114,6 +121,9 @@ if uploaded_file is not None:
                     # 진행 상태 표시를 위한 컴포넌트 추가
                     progress_bar = st.progress(0)
                     status_text = st.empty()
+                    time_elapsed = st.empty()
+                    
+                    start_time = time.time()
                     
                     # CLI 명령어 실행
                     process = subprocess.Popen(
@@ -128,6 +138,10 @@ if uploaded_file is not None:
                     
                     # 실시간으로 출력 처리
                     while process.poll() is None:
+                        # 경과 시간 표시
+                        elapsed = int(time.time() - start_time)
+                        time_elapsed.text(f"경과 시간: {elapsed}초")
+                        
                         # stdout 확인
                         stdout_line = process.stdout.readline()
                         if stdout_line:
@@ -137,7 +151,7 @@ if uploaded_file is not None:
                         stderr_line = process.stderr.readline()
                         if stderr_line:
                             st.write("진행:", stderr_line.strip())
-                            # 진행률 파싱 (예: "60%|██████ |" 형식)
+                            # 진행률 파싱
                             if '%|' in stderr_line:
                                 try:
                                     percent = int(stderr_line.split('%')[0])
@@ -145,6 +159,12 @@ if uploaded_file is not None:
                                     status_text.text(f"번역 진행 중... {percent}%")
                                 except ValueError:
                                     pass
+                        
+                        # 타임아웃 체크 (DeepL: 5분, 기타: 1분)
+                        if elapsed > (300 if translation_service == "DeepL" else 60):
+                            process.kill()
+                            st.error("번역 시간이 초과되었습니다. 다시 시도해주세요.")
+                            st.stop()
                     
                     # 남은 출력 처리
                     stdout, stderr = process.communicate()
