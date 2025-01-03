@@ -164,7 +164,7 @@ if uploaded_file is not None:
                                 except ValueError:
                                     pass
                         
-                        # 남은 출력 처리
+                        # 프로세스 완료 후 남은 출력 처리
                         stdout, stderr = process.communicate()
                         if stdout:
                             st.write("최종 출력:", stdout)
