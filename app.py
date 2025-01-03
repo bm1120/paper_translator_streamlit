@@ -108,22 +108,31 @@ if uploaded_file is not None:
                     )
                     
                     # 실시간으로 출력 처리
-                    while True:
-                        output = process.stderr.readline()
-                        if output == '' and process.poll() is not None:
-                            break
-                        if output:
+                    while process.poll() is None:
+                        # stdout 확인
+                        stdout_line = process.stdout.readline()
+                        if stdout_line:
+                            st.write("출력:", stdout_line.strip())
+                        
+                        # stderr 확인
+                        stderr_line = process.stderr.readline()
+                        if stderr_line:
+                            st.write("진행:", stderr_line.strip())
                             # 진행률 파싱 (예: "60%|██████ |" 형식)
-                            if '%|' in output:
+                            if '%|' in stderr_line:
                                 try:
-                                    percent = int(output.split('%')[0])
+                                    percent = int(stderr_line.split('%')[0])
                                     progress_bar.progress(percent / 100)
                                     status_text.text(f"번역 진행 중... {percent}%")
                                 except ValueError:
                                     pass
-                            st.write(output.strip())
                     
-                    process.wait()
+                    # 남은 출력 처리
+                    stdout, stderr = process.communicate()
+                    if stdout:
+                        st.write("최종 출력:", stdout)
+                    if stderr:
+                        st.write("최종 에러:", stderr)
                     
                     if process.returncode != 0:
                         st.error("번역 중 오류가 발생했습니다.")
