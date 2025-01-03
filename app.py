@@ -9,10 +9,10 @@ load_dotenv()
 
 st.title("PDF 논문 번역기")
 
-# 번역 서비스 선택 옵션 추가
+# 번역 서비스 선택 옵션 수정 (DeepL을 두 번째로 이동)
 translation_service = st.selectbox(
     "번역 서비스를 선택하세요",
-    ["Google", "OpenAI", "DeepL", "Ollama"],
+    ["Google", "DeepL", "OpenAI", "Ollama"],  # DeepL 위치 변경
     index=0
 )
 
@@ -21,6 +21,12 @@ if translation_service == "OpenAI":
     api_key = st.text_input("OpenAI API 키를 입력하세요", type="password")
     if api_key:
         os.environ["OPENAI_API_KEY"] = api_key
+
+# DeepL API 키 입력 부분 추가 (OpenAI 부분 아래에)
+if translation_service == "DeepL":
+    deepl_key = st.text_input("DeepL API 키를 입력하세요", type="password")
+    if deepl_key:
+        os.environ["DEEPL_AUTH_KEY"] = deepl_key
 
 # PDF 파일 업로드
 uploaded_file = st.file_uploader("PDF 파일을 업로드하세요", type="pdf")
