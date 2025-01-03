@@ -163,51 +163,51 @@ if uploaded_file is not None:
                                     status_text.text(f"번역 진행 중... {percent}%")
                                 except ValueError:
                                     pass
-                        
-                        # 프로세스 완료 후 남은 출력 처리
-                        stdout, stderr = process.communicate()
-                        if stdout:
-                            st.write("최종 출력:", stdout)
-                        if stderr:
-                            st.write("최종 에러:", stderr)
-                        
-                        if process.returncode != 0:
-                            st.error("번역 중 오류가 발생했습니다.")
-                            st.stop()
-                        else:
-                            progress_bar.progress(1.0)
-                            status_text.text("번역 완료!")
-                        
-                        # 번역된 파일 확인 및 저장
-                        if os.path.exists(translated_path):
-                            final_translated_path = os.path.join(UPLOAD_DIR, f"{file_base_name}_translated.pdf")
-                            shutil.copy2(translated_path, final_translated_path)
-                            with open(final_translated_path, "rb") as file:
-                                st.download_button(
-                                    label="번역된 PDF 다운로드 (단일 언어)",
-                                    data=file,
-                                    file_name=f"{file_base_name}_translated.pdf",
-                                    mime="application/pdf"
-                                )
-                            st.success(f"번역된 파일이 저장되었습니다: {final_translated_path}")
-                        else:
-                            st.warning(f"번역된 PDF 파일을 찾을 수 없습니다. (찾은 경로: {translated_path})")
-                            st.write("임시 디렉토리 내용:", os.listdir(temp_dir))
-                        
-                        if os.path.exists(dual_path):
-                            final_dual_path = os.path.join(UPLOAD_DIR, f"{file_base_name}_dual.pdf")
-                            shutil.copy2(dual_path, final_dual_path)
-                            with open(final_dual_path, "rb") as file:
-                                st.download_button(
-                                    label="이중 언어 PDF 다운로드",
-                                    data=file,
-                                    file_name=f"{file_base_name}_dual.pdf",
-                                    mime="application/pdf"
-                                )
-                            st.success(f"이중 언어 파일이 저장되었습니다: {final_dual_path}")
-                        else:
-                            st.warning(f"이중 언어 PDF 파일을 찾을 수 없습니다. (찾은 경로: {dual_path})")
-                            st.write("임시 디렉토리 내용:", os.listdir(temp_dir))
+                    
+                    # 프로세스 완료 후 남은 출력 처리
+                    stdout, stderr = process.communicate()
+                    if stdout:
+                        st.write("최종 출력:", stdout)
+                    if stderr:
+                        st.write("최종 에러:", stderr)
+                    
+                    if process.returncode != 0:
+                        st.error("번역 중 오류가 발생했습니다.")
+                        st.stop()
+                    else:
+                        progress_bar.progress(1.0)
+                        status_text.text("번역 완료!")
+                    
+                    # 번역된 파일 확인 및 저장
+                    if os.path.exists(translated_path):
+                        final_translated_path = os.path.join(UPLOAD_DIR, f"{file_base_name}_translated.pdf")
+                        shutil.copy2(translated_path, final_translated_path)
+                        with open(final_translated_path, "rb") as file:
+                            st.download_button(
+                                label="번역된 PDF 다운로드 (단일 언어)",
+                                data=file,
+                                file_name=f"{file_base_name}_translated.pdf",
+                                mime="application/pdf"
+                            )
+                        st.success(f"번역된 파일이 저장되었습니다: {final_translated_path}")
+                    else:
+                        st.warning(f"번역된 PDF 파일을 찾을 수 없습니다. (찾은 경로: {translated_path})")
+                        st.write("임시 디렉토리 내용:", os.listdir(temp_dir))
+                    
+                    if os.path.exists(dual_path):
+                        final_dual_path = os.path.join(UPLOAD_DIR, f"{file_base_name}_dual.pdf")
+                        shutil.copy2(dual_path, final_dual_path)
+                        with open(final_dual_path, "rb") as file:
+                            st.download_button(
+                                label="이중 언어 PDF 다운로드",
+                                data=file,
+                                file_name=f"{file_base_name}_dual.pdf",
+                                mime="application/pdf"
+                            )
+                        st.success(f"이중 언어 파일이 저장되었습니다: {final_dual_path}")
+                    else:
+                        st.warning(f"이중 언어 PDF 파일을 찾을 수 없습니다. (찾은 경로: {dual_path})")
+                        st.write("임시 디렉토리 내용:", os.listdir(temp_dir))
 
         except Exception as e:
             st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
