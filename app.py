@@ -4,6 +4,25 @@ import subprocess
 from dotenv import load_dotenv
 import tempfile
 import shutil
+import sys
+
+# 버전 정보 출력
+st.write(f"Python 버전: {sys.version}")
+st.write(f"실행 경로: {os.getcwd()}")
+
+# 필요한 시스템 패키지 확인
+try:
+    subprocess.run(["pdftotext", "-v"], capture_output=True)
+    st.write("poppler-utils 설치됨")
+except FileNotFoundError:
+    st.error("poppler-utils가 설치되지 않았습니다.")
+
+# pdf2zh 설치 확인
+try:
+    subprocess.run(["pdf2zh", "--version"], capture_output=True)
+    st.write("pdf2zh 설치됨")
+except FileNotFoundError:
+    st.error("pdf2zh가 설치되지 않았습니다.")
 
 load_dotenv()
 

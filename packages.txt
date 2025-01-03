@@ -1,2 +1,3 @@
 poppler-utils
-build-essential 
+build-essential
+python3-dev 
