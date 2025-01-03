@@ -59,7 +59,7 @@ if uploaded_file is not None:
         if not check_api_keys(translation_service):
             st.stop()
         try:
-            with st.spinner("번역 중..."):
+            with st.spinner("번역 중비 중..."):
                 # 임시 디렉토리 생성
                 with tempfile.TemporaryDirectory() as temp_dir:
                     # 입력 파일 경로
@@ -92,21 +92,45 @@ if uploaded_file is not None:
                     
                     st.write(f"실행 명령어: {' '.join(command)}")
                     
-                    process = subprocess.run(
+                    # 진행 상태 표시를 위한 컴포넌트 추가
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    # CLI 명령어 실행
+                    process = subprocess.Popen(
                         command,
-                        capture_output=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
                         text=True,
+                        bufsize=1,
+                        universal_newlines=True,
                         cwd=temp_dir
                     )
                     
-                    if process.stdout:
-                        st.write("실행 출력:", process.stdout)
-                    if process.stderr:
-                        st.write("에러 출력:", process.stderr)
+                    # 실시간으로 출력 처리
+                    while True:
+                        output = process.stderr.readline()
+                        if output == '' and process.poll() is not None:
+                            break
+                        if output:
+                            # 진행률 파싱 (예: "60%|██████ |" 형식)
+                            if '%|' in output:
+                                try:
+                                    percent = int(output.split('%')[0])
+                                    progress_bar.progress(percent / 100)
+                                    status_text.text(f"번역 진행 중... {percent}%")
+                                except ValueError:
+                                    pass
+                            st.write(output.strip())
+                    
+                    process.wait()
                     
                     if process.returncode != 0:
-                        st.error(f"번역 중 오류가 발생했습니다.")
+                        st.error("번역 중 오류가 발생했습니다.")
                         st.stop()
+                    else:
+                        progress_bar.progress(1.0)
+                        status_text.text("번역 완료!")
                     
                     # 번역된 파일 확인 및 저장
                     if os.path.exists(translated_path):
