@@ -1,0 +1,5 @@
+streamlit==1.31.0
+pdf2zh
+python-dotenv
+pdfminer.six>=20221105
+PyMuPDF>=1.22.5 
